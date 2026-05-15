@@ -1,4 +1,4 @@
-import { StockData, StrategyRecommendation, GreeksData, DailyReview, PerformanceMetrics, OptionData } from "@/types";
+import { StockData, StrategyRecommendation, GreeksData, DailyReview, PerformanceMetrics, OptionData, TradingError, PnLHeatmapData, HoldingTimeData, SentimentPnLData, AIDailyAnalysis } from "@/types";
 
 // May 11, 2026 Market Data (5月11日)
 export const stockData: StockData[] = [
@@ -381,3 +381,90 @@ export const performanceHistory = [
   { month: "Apr", return: 3.5, trades: 30, winRate: 83 },
   { month: "May", return: 7.2, trades: 22, winRate: 90 },
 ];
+
+// ====== New Data: Trading Errors ======
+export const tradingErrors: TradingError[] = [
+  { id: "e1", type: "FOMO Entry", description: "追涨买入 — 看到暴涨后FOMO追高", count: 42, totalLoss: 18500, frequency: "high", example: "AMD 458收最高，次日追458被套", solution: "等回踩VWAP/支撑位再进，至少等15分钟回调确认", lastOccurred: "2026-05-09" },
+  { id: "e2", type: "Late Exit", description: "贪心不止盈 — 到了目标价不卖", count: 38, totalLoss: 15200, frequency: "high", example: "MU目标830到了，想等840，结果回到800", solution: "到目标价分批减仓50%，剩下的用trailing stop", lastOccurred: "2026-05-08" },
+  { id: "e3", type: "Oversized Position", description: "仓位过重 — 单笔仓位超过总资金20%", count: 25, totalLoss: 22800, frequency: "high", example: "TSLA单笔仓位30%，振幅大被止损出局", solution: "单笔不超过10%，高风险标的不超过5%", lastOccurred: "2026-05-10" },
+  { id: "e4", type: "Ignoring IV Crush", description: "忽略IV Crush — 事件后IV暴跌导致期权贬值", count: 18, totalLoss: 8900, frequency: "medium", example: "NVDA财报前买Call，财报好但IV暴跌，Call反跌", solution: "事件前买Option要考虑IV，最好是事件后等IV回落再卖Put", lastOccurred: "2026-05-05" },
+  { id: "e5", type: "Revenge Trade", description: "情绪化交易 — 亏损后急于回本加仓", count: 15, totalLoss: 19600, frequency: "medium", example: "AMD亏损后加仓TSLA试图回本，结果双亏", solution: "亏损后至少停30分钟，不报复性加仓，严格执行当日最大亏损限制", lastOccurred: "2026-05-07" },
+  { id: "e6", type: "No Stop Loss", description: "没设止损 — 亏损无限扩大", count: 12, totalLoss: 25400, frequency: "medium", example: "CRDO 220买入没止损，跌到180才割肉", solution: "每笔交易必设止损，ATM Call止损设在premium的50%", lastOccurred: "2026-05-06" },
+  { id: "e7", type: "Overtrading", description: "过度交易 — 一天超过5笔交易", count: 22, totalLoss: 12300, frequency: "high", example: "一天做了8笔交易，4笔亏损，手续费吃掉利润", solution: "每天限3-5笔高质量交易，不为了交易而交易", lastOccurred: "2026-05-09" },
+  { id: "e8", type: "Wrong Direction", description: "逆势操作 — 明明趋势向下却买Call", count: 10, totalLoss: 7200, frequency: "low", example: "GOOGL资金流出期买Call", solution: "先看板块和个股趋势，逆势只做小仓对冲", lastOccurred: "2026-05-04" },
+];
+
+// ====== New Data: P&L Heatmap (by weekday x time slot) ======
+export const pnlHeatmapData: PnLHeatmapData[] = (() => {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const hours = ["9:30", "10:00", "10:30", "11:00", "11:30", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"];
+  const data: PnLHeatmapData[] = [];
+  const seed = [2, -1, 3, -2, 1, 0, -3, 2, 1, -1, 3, 1, 0]; // Monday pattern
+  days.forEach((day, di) => {
+    hours.forEach((hour, hi) => {
+      const base = seed[hi] || 0;
+      const noise = Math.floor(Math.random() * 4) - 2;
+      const value = base + noise + (di % 2 === 0 ? 1 : -1);
+      data.push({ day, hour, value });
+    });
+  });
+  return data;
+})();
+
+// ====== New Data: Holding Time vs Return ======
+export const holdingTimeData: HoldingTimeData[] = [
+  { symbol: "MU", holdingHours: 2.5, returnPct: 35, strategy: "Bull Call Spread" },
+  { symbol: "NVDA", holdingHours: 4, returnPct: 28, strategy: "Long Call" },
+  { symbol: "ORCL", holdingHours: 8, returnPct: 22, strategy: "Cash Secured Put" },
+  { symbol: "AMD", holdingHours: 1, returnPct: -12, strategy: "Long Call" },
+  { symbol: "TSLA", holdingHours: 0.5, returnPct: 8, strategy: "Scalp Call" },
+  { symbol: "QQQ", holdingHours: 24, returnPct: 15, strategy: "Bull Put Spread" },
+  { symbol: "INTC", holdingHours: 3, returnPct: 18, strategy: "Long Call" },
+  { symbol: "AAPL", holdingHours: 6, returnPct: -5, strategy: "Covered Call" },
+  { symbol: "MSFT", holdingHours: 48, returnPct: 10, strategy: "Wheel" },
+  { symbol: "COIN", holdingHours: 1.5, returnPct: -18, strategy: "Long Call" },
+  { symbol: "QCOM", holdingHours: 3.5, returnPct: 25, strategy: "Bull Call Spread" },
+  { symbol: "RKLB", holdingHours: 2, returnPct: 42, strategy: "Long Call" },
+  { symbol: "CRDO", holdingHours: 0.8, returnPct: -8, strategy: "Scalp Call" },
+  { symbol: "GOOGL", holdingHours: 12, returnPct: -3, strategy: "Long Put" },
+  { symbol: "BABA", holdingHours: 72, returnPct: 5, strategy: "Cash Secured Put" },
+];
+
+// ====== New Data: Sentiment vs P&L ======
+export const sentimentPnLData: SentimentPnLData[] = [
+  { date: "5/1", sentiment: 75, pnl: 3200, tradeCount: 4 },
+  { date: "5/2", sentiment: 82, pnl: 5800, tradeCount: 3 },
+  { date: "5/3", sentiment: 90, pnl: -4200, tradeCount: 7 },
+  { date: "5/4", sentiment: 45, pnl: 1200, tradeCount: 2 },
+  { date: "5/5", sentiment: 60, pnl: 2800, tradeCount: 3 },
+  { date: "5/6", sentiment: 30, pnl: -1500, tradeCount: 5 },
+  { date: "5/7", sentiment: 95, pnl: -8500, tradeCount: 8 },
+  { date: "5/8", sentiment: 70, pnl: 4500, tradeCount: 4 },
+  { date: "5/9", sentiment: 55, pnl: 6200, tradeCount: 2 },
+  { date: "5/10", sentiment: 85, pnl: -3200, tradeCount: 6 },
+  { date: "5/11", sentiment: 40, pnl: 3800, tradeCount: 3 },
+];
+
+// ====== New Data: AI Daily Analysis ======
+export const aiDailyAnalysis: AIDailyAnalysis = {
+  date: "2026-05-11",
+  gammaAlert: "AMD/TSLA/CRDO进入Gamma Squeeze极端区域，OTM Call未平仓量异常放大，空头回补压力极大",
+  gammaLevel: "extreme",
+  deltaExposure: "整体Delta偏多 +0.35，但Gamma敞口集中，一旦回落Gamma翻转风险高",
+  ivRank: "整体IV Rank 72%，处于高位区间，期权成本偏高",
+  ivPercentile: 72,
+  keyLevels: [
+    { symbol: "AMD", support: 440, resistance: 468 },
+    { symbol: "TSLA", support: 425, resistance: 460 },
+    { symbol: "MU", support: 770, resistance: 820 },
+    { symbol: "NVDA", support: 1055, resistance: 1100 },
+    { symbol: "QQQ", support: 520, resistance: 535 },
+  ],
+  aiRecommendation: "今日最佳策略：回踩支撑位买入ATM Call，目标25-45%收益，严格止损。避开Gamma极端标的(AMD/TSLA)的追多操作。",
+  riskWarnings: [
+    "Gamma Squeeze反转风险 — AMD/TSLA/CRDO一旦多空力量翻转，回调幅度可能达8-15%",
+    "IV高位买入期权成本高 — 建议等IV回落或使用价差策略降低成本",
+    "情绪过度乐观 — AI板块资金过度集中，一旦出现利空可能集体踩踏",
+    "周末Gamma风险 — 周五持有Gamma敞口的期权面临周末时间衰减加速",
+  ],
+};

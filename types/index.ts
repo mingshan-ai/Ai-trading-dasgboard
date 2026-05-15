@@ -78,3 +78,49 @@ export interface PerformanceMetrics {
   sharpeRatio: number;
   annualizedReturn: number;
 }
+
+// New types for enhanced features
+
+export interface TradingError {
+  id: string;
+  type: string;
+  description: string;
+  count: number;
+  totalLoss: number;
+  frequency: "high" | "medium" | "low";
+  example: string;
+  solution: string;
+  lastOccurred: string;
+}
+
+export interface PnLHeatmapData {
+  day: string;
+  hour: string;
+  value: number;
+}
+
+export interface HoldingTimeData {
+  symbol: string;
+  holdingHours: number;
+  returnPct: number;
+  strategy: string;
+}
+
+export interface SentimentPnLData {
+  date: string;
+  sentiment: number;
+  pnl: number;
+  tradeCount: number;
+}
+
+export interface AIDailyAnalysis {
+  date: string;
+  gammaAlert: string;
+  gammaLevel: "extreme" | "high" | "normal" | "low";
+  deltaExposure: string;
+  ivRank: string;
+  ivPercentile: number;
+  keyLevels: { symbol: string; support: number; resistance: number }[];
+  aiRecommendation: string;
+  riskWarnings: string[];
+}

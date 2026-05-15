@@ -14,7 +14,10 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { performanceMetrics, performanceHistory } from "@/data/market";
+import { performanceMetrics, performanceHistory, pnlHeatmapData, holdingTimeData, sentimentPnLData } from "@/data/market";
+import PnLHeatmap from "@/app/components/charts/PnLHeatmap";
+import HoldingTimeChart from "@/app/components/charts/HoldingTimeChart";
+import SentimentScatter from "@/app/components/charts/SentimentScatter";
 import { TrendingUp, Target, Activity, Award, TrendingDown, BarChart3 } from "lucide-react";
 
 export default function PerformancePage() {
@@ -164,6 +167,15 @@ export default function PerformancePage() {
           </div>
         </div>
       </div>
+
+      {/* Advanced Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PnLHeatmap data={pnlHeatmapData} />
+        <HoldingTimeChart data={holdingTimeData} />
+      </div>
+
+      {/* Sentiment Analysis */}
+      <SentimentScatter data={sentimentPnLData} />
 
       {/* Goals Tracker */}
       <div className="card">

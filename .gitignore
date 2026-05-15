@@ -34,3 +34,11 @@ next-env.d.ts
 
 # turbopack
 .turbopack/
+
+# temp fix scripts (not for production)
+fix-*.js
+batch-fix.js
+bootstrap-npm.js
+install-subdeps.js
+npm-proxy.js
+npm.cmd
