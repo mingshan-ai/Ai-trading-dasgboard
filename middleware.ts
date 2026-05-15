@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getRequiredPlan } from "@/lib/subscription";
+import type { PlanType } from "@/lib/subscription";
 import type { NextRequest } from "next/server";
 
-// Routes that don't require auth (all pages are publicly accessible)
+const PLAN_ORDER: PlanType[] = ["FREE", "BASIC", "PRO"];
+
+// Routes that are always accessible (no auth needed)
 const publicRoutes = ["/login", "/register", "/pricing"];
 
 export async function middleware(request: NextRequest) {
@@ -29,15 +33,50 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Only protect /admin routes - require authentication + admin role
+  // Admin routes - require admin role
   if (pathname.startsWith("/admin")) {
     const session = await auth();
     if (!session?.user || !session.user.isAdmin) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+    return NextResponse.next();
   }
 
-  // All other routes are publicly accessible
+  // Check if this page requires a specific plan
+  const requiredPlan = getRequiredPlan(pathname);
+
+  // No plan requirement (e.g., root "/" is FREE) - allow access
+  if (!requiredPlan) {
+    return NextResponse.next();
+  }
+
+  // For pages requiring BASIC or higher, check auth
+  const session = await auth();
+
+  // Admin users bypass all plan checks
+  if (session?.user?.isAdmin) {
+    return NextResponse.next();
+  }
+
+  // Unauthenticated users → redirect to pricing
+  if (!session?.user) {
+    const url = new URL("/pricing", request.url);
+    url.searchParams.set("from", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Check plan level
+  const userPlan = (session.user.plan as PlanType) || "FREE";
+  const userLevel = PLAN_ORDER.indexOf(userPlan);
+  const requiredLevel = PLAN_ORDER.indexOf(requiredPlan);
+
+  if (userLevel < requiredLevel) {
+    const url = new URL("/pricing", request.url);
+    url.searchParams.set("from", pathname);
+    url.searchParams.set("required", requiredPlan);
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 

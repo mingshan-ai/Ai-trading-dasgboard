@@ -33,7 +33,7 @@ export default function StocksPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Watchlist / 行情监控</h1>
-          <p className="text-sm text-gray-500 mt-1">15 tracked symbols &middot; May 11, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">15 tracked symbols &middot; May 15, 2026</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">

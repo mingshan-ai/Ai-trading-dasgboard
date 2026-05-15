@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { Crown, ArrowLeft, Users, CreditCard, Settings } from "lucide-react";
+import { Crown, ArrowLeft, Users, CreditCard, Settings, DollarSign, TrendingUp, ArrowUpRight } from "lucide-react";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -33,6 +33,23 @@ export default async function AdminPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  // Revenue stats
+  const succeededPayments = await prisma.payment.findMany({
+    where: { status: "succeeded" },
+  });
+  const totalRevenue = succeededPayments.reduce((sum, p) => sum + p.amount, 0);
+
+  const now = new Date();
+  const thisMonthPayments = succeededPayments.filter((p) => {
+    const d = new Date(p.createdAt);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const monthlyRevenue = thisMonthPayments.reduce((sum, p) => sum + p.amount, 0);
+
+  const activeSubscriptions = await prisma.subscription.count({
+    where: { status: "active" },
+  });
+
   const stats = {
     total: users.length,
     free: users.filter((u: any) => u.plan === "FREE").length,
@@ -58,7 +75,7 @@ export default async function AdminPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold">Admin Panel</h1>
-          <p className="text-sm text-gray-500">Manage users and subscriptions</p>
+          <p className="text-sm text-gray-500">Manage users, subscriptions & revenue</p>
         </div>
       </div>
 
@@ -81,6 +98,46 @@ export default async function AdminPage() {
             <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
           </div>
         ))}
+      </div>
+
+      {/* Revenue Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="bg-[#0d0d14] border border-[#1e1e2e] rounded-xl p-4">
+          <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+            <DollarSign className="w-4 h-4" />
+            Total Revenue
+          </div>
+          <div className="text-2xl font-bold text-green-400">
+            ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </div>
+        </div>
+        <div className="bg-[#0d0d14] border border-[#1e1e2e] rounded-xl p-4">
+          <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+            <TrendingUp className="w-4 h-4" />
+            This Month
+          </div>
+          <div className="text-2xl font-bold text-blue-400">
+            ${monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </div>
+        </div>
+        <div className="bg-[#0d0d14] border border-green-500/20 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+              <CreditCard className="w-4 h-4" />
+              Revenue & Payments
+            </div>
+            <div className="text-sm text-gray-400">
+              {activeSubscriptions} active subscriptions
+            </div>
+          </div>
+          <Link
+            href="/admin/payments"
+            className="flex items-center gap-1 text-sm text-green-400 hover:text-green-300 font-medium transition-colors"
+          >
+            View Details
+            <ArrowUpRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
 
       {/* Users Table */}
