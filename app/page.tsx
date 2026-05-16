@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { auth } from "@/lib/auth";
 import {
   TrendingUp,
   TrendingDown,
@@ -20,8 +19,6 @@ import SentimentScatter from "@/app/components/charts/SentimentScatter";
 import TradingViewWidget from "@/app/components/charts/TradingViewWidget";
 
 export default async function Home() {
-  const session = await auth();
-
   const superStocks = stockData.filter((s) => s.layer === "super");
   const instStocks = stockData.filter((s) => s.layer === "institution");
   const weakStocks = stockData.filter((s) => s.layer === "weak");
