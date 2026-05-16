@@ -11,8 +11,6 @@ import {
   Brain,
   Shield,
   Radio,
-  Crown,
-  Lock,
 } from "lucide-react";
 import { stockData, performanceMetrics, dailyReview, strategyRecommendations, aiDailyAnalysis, tradingErrors, pnlHeatmapData, holdingTimeData, sentimentPnLData } from "@/data/market";
 import PnLHeatmap from "@/app/components/charts/PnLHeatmap";
@@ -23,9 +21,6 @@ import TradingViewWidget from "@/app/components/charts/TradingViewWidget";
 
 export default async function Home() {
   const session = await auth();
-  const userPlan = (session?.user?.plan as string) || "FREE";
-  const isAdmin = session?.user?.isAdmin || false;
-  const isFree = userPlan === "FREE" && !isAdmin;
 
   const superStocks = stockData.filter((s) => s.layer === "super");
   const instStocks = stockData.filter((s) => s.layer === "institution");
@@ -64,31 +59,7 @@ export default async function Home() {
         <MetricCard title="Error Loss" value={`-$${tradingErrors.reduce((s, e) => s + e.totalLoss, 0).toLocaleString()}`} subtitle="Total from mistakes" positive={false} icon={<AlertTriangle className="w-4 h-4" />} />
       </div>
 
-      {/* Premium content area with paywall */}
-      <div className="relative">
-        {/* Blur overlay for FREE users */}
-        {isFree && (
-          <div className="absolute inset-0 z-20 backdrop-blur-md bg-[#0a0a0f]/60 rounded-xl flex items-center justify-center" style={{ marginTop: "-5px" }}>
-            <div className="text-center max-w-sm mx-auto px-4">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 mb-4">
-                <Lock className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Premium Content</h3>
-              <p className="text-sm text-gray-400 mb-6">
-                Unlock AI-powered analysis, live charts, strategy recommendations and more.
-              </p>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
-              >
-                <Crown className="w-4 h-4" />
-                Upgrade Now
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* === AI Daily Analysis Panel === */}
+      {/* === AI Daily Analysis Panel === */}
         <div className="card card-accent-purple">
           <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
             <Brain className="w-4 h-4 text-purple-400" />
@@ -357,7 +328,6 @@ export default async function Home() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }
