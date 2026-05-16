@@ -9,25 +9,8 @@ export function canAccessPlan(userPlan: PlanType, requiredPlan: PlanType): boole
 }
 
 export function getRequiredPlan(pathname: string): PlanType | null {
-  const planMap: Record<string, PlanType> = {
-    "/": "FREE",
-    "/stocks": "BASIC",
-    "/options": "BASIC",
-    "/greeks": "PRO",
-    "/strategy": "PRO",
-    "/review": "PRO",
-    "/performance": "PRO",
-  };
-
-  // Find the most specific match
-  const matchedKey = Object.keys(planMap)
-    .sort((a, b) => b.length - a.length)
-    .find((key) => {
-      if (key === "/") return pathname === "/";
-      return pathname.startsWith(key);
-    });
-
-  return matchedKey ? planMap[matchedKey] : null;
+  // Paywall removed - all pages are free
+  return null;
 }
 
 export async function getUserPlan(email: string): Promise<PlanType> {
